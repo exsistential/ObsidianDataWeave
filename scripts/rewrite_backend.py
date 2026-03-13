@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import os
+import platform
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
+
+_IS_WINDOWS = platform.system() == "Windows"
 
 
 def detect_backend(explicit: str | None = None) -> str:
@@ -72,11 +76,12 @@ def call_claude(
 ) -> str:
     """Call Claude CLI with the assembled prompt, return stdout."""
     clean_env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
+    claude_bin = shutil.which("claude") or "claude"
 
     for attempt in range(1, max_retries + 1):
         try:
             result = subprocess.run(
-                ["claude", "--print"],
+                [claude_bin, "--print"],
                 input=prompt,
                 capture_output=True,
                 text=True,
@@ -109,7 +114,7 @@ def call_claude(
                 )
                 try:
                     cont_result = subprocess.run(
-                        ["claude", "--print"],
+                        [claude_bin, "--print"],
                         input=cont_prompt,
                         capture_output=True,
                         text=True,

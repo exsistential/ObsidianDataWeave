@@ -264,9 +264,10 @@ def validate_enrich_result(result: dict, vault_titles: set[str]) -> list[str]:
     wikilink_re = re.compile(r"\[\[([^\]]+)\]\]")
     body = note.get("body", "")
     for match in wikilink_re.finditer(body):
-        target = match.group(1).strip()
+        raw = match.group(1).strip()
+        target = raw.split("|")[0].strip()  # handle [[Page|alias]] format
         if target not in vault_titles:
-            errors.append(f"Wikilink [[{target}]] not found in vault titles")
+            errors.append(f"Wikilink [[{raw}]] not found in vault titles")
 
     return errors
 
